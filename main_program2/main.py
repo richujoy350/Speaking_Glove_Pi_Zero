@@ -30,25 +30,27 @@ class HomePage:
         self.root.bind('2', self.open_stt_functionality)
         # Bind key '4' to the TTS functionality
         self.root.bind('4', self.open_saved_messages_functionality)
+        # Bind key '3' to the TTS functionality
+        self.root.bind('3', self.open_images_to_speech_functionality)
         # Bind Ctrl+q to quit application
         self.root.bind("<Control-q>", self.quit_application)
         self.root.mainloop()
 
     def open_tts_functionality(self, event=None):
-        self.root.destroy()
         subprocess.Popen(["python", "tts.py"])
+        self.root.destroy()
 
     def open_stt_functionality(self, event=None):
-        self.root.destroy()
         subprocess.Popen(["python", "stt.py"])
+        self.root.destroy()
 
-    def open_images_to_speech_functionality(self):
-        # Logic to open Images to Speech functionality
-        pass
+    def open_images_to_speech_functionality(self, event=None):
+        subprocess.Popen( ["python", "hmi.py"])
+        self.root.destroy()
 
     def open_saved_messages_functionality(self, event=None):
-        root.destroy()
         subprocess.Popen(["python", "saved_messages.py"])
+        self.root.destroy()
 
     def quit_application(self, event=None):
         self.root.destroy()
