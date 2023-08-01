@@ -1,5 +1,7 @@
 import tkinter as tk
 import pyttsx3
+
+import subprocess
 import threading
 
 
@@ -8,7 +10,7 @@ class Application:
         self.root = root
         self.root.focus_force()
         # Load and display the image
-        self.image_path = "images/main.png"
+        self.image_path = "images/glovemain.png"
         self.photo = tk.PhotoImage(file=self.image_path)
         self.label = tk.Label(root, image=self.photo)
         self.label.pack(fill=tk.BOTH, expand=tk.YES)
@@ -21,9 +23,51 @@ class Application:
         root.mainloop()
 
     def play_audio(self, text):
-        engine = pyttsx3.init()
-        threading.Thread(target=engine.say(text))
-        engine.runAndWait()
+        # engine = pyttsx3.init()
+        # threading.Thread(target=engine.say(text))
+        # engine.runAndWait()
+        subprocess.call(["espeak", "-v", "ml+m3", "-s", "120", "-k", "0.8", text])
+
+    def display_image(self, image_path):
+        photo = tk.PhotoImage(file=image_path)
+        self.label.configure(image=photo)
+        self.label.image = photo
+
+    def open_tts_functionality(self, event=None):
+        # Hide the image label temporarily
+        self.label.pack_forget()
+
+        # Create a text box
+        self.text_box = tk.Text(self.root, height=10, width=50)
+        self.text_box.pack(pady=10)
+        self.text_box.focus_set()  # Set focus on the text box
+
+        # Create a "Speak" button
+        self.speak_button = tk.Button(self.root, text="Speak", command=self.speak_text)
+        self.text_box.bind("<Return>", self.speak_text)
+
+        # Set the focus to the text box
+        self.root.bind("<Escape>", lambda event: self.default_binding())
+        # Bind Ctrl+q to quit application
+        self.root.bind("<Control-q>", self.quit_application)
+        self.root.unbind("1")
+        self.root.unbind("2")
+        self.root.unbind("3")
+        self.root.unbind("4")
+        self.root.unbind("5")
+        self.root.unbind("6")
+        self.speak_button.pack()
+
+    def open_stt_functionality(self, event=None):
+        self.its_default_binding()
+
+    def open_saved_functionality(self, event=None):
+        self.its_default_binding()
+
+    def open_its_functionality(self, event=None):
+        self.its_default_binding()
+        self.image = "images/its_main.png"
+        self.display_image(self.image)
 
     def open_general_functionality(self, event=None):
         if not self.process_running:
@@ -60,6 +104,10 @@ class Application:
                     target=self.display_icon_and_speak,
                     args=("images/pain-icon.png", "Pain", "images/general.png"),
                 ).start(),
+            )
+            self.root.bind(
+                "<Escape>",
+                self.open_its_functionality,
             )
 
     def open_emergency_functionality(self, event=None):
@@ -207,6 +255,26 @@ class Application:
     def default_binding(self, event=None):
         # Reset the default bindings
         # Bind key '1' to the TTS functionality
+        self.root.bind("1", self.open_tts_functionality)
+        # Bind key '2' to the TTS functionality
+        self.root.bind("2", self.open_stt_functionality)
+        # Bind key '4' to the TTS functionality
+        self.root.bind("3", self.open_its_functionality)
+        # Bind key '3' to the TTS functionality
+        self.root.bind("4", self.open_saved_functionality)
+        # Bind Escape key to go back to default binding
+        self.root.bind("<Escape>", self.default_binding)
+        # Bind Ctrl+q to quit application
+        self.root.bind("<Control-q>", self.quit_application)
+
+        self.root.unbind("5")
+        self.root.unbind("6")
+        self.display_image(self.image_path)
+        self.process_running = False
+
+    def its_default_binding(self, event=None):
+        # Reset the default bindings
+        # Bind key '1' to the TTS functionality
         self.root.bind("1", self.open_general_functionality)
         # Bind key '2' to the TTS functionality
         self.root.bind("2", self.open_emergency_functionality)
@@ -221,13 +289,8 @@ class Application:
 
         self.root.unbind("5")
         self.root.unbind("6")
-        self.display_image(self.image_path)
-        self.process_running = False
 
-    def display_image(self, image_path):
-        photo = tk.PhotoImage(file=image_path)
-        self.label.configure(image=photo)
-        self.label.image = photo
+        self.process_running = False
 
     def quit_application(self, event=None):
         self.root.destroy()
@@ -240,10 +303,17 @@ class Application:
         # self.play_audio(text_to_speak)
         self.process_running = False
 
+    def speak_text(self, event=None):
+        text_to_speak = self.text_box.get("1.0", tk.END).strip()
+        if text_to_speak:
+            threading.Thread(target=self.play_audio, args=(text_to_speak,)).start()
+
 
 # Create the Tkinter window
 root = tk.Tk()
+root.geometry("480x320")  # Set the window size to 480x320
 root.attributes("-fullscreen", True)  # Set the window to full screen
+
 
 # Create an instance of the Application class
 app = Application(root)
